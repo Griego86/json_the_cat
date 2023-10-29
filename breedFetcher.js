@@ -2,26 +2,30 @@
 const request = require('request');
 const api = 'https://api.thecatapi.com/v1/breeds/search';
 
-// User input via command line
-const userInput = process.argv[2];
 
-// Add query to URL for cat breed
-let apiQuery = `${api}?q=${userInput}`;
+const fetchBreedDescription = (breedName, callback) => {
+  // Add query to URL for cat breed
+  let apiQuery = `${api}?q=${breedName}`;
 
-// http request for api
-request(apiQuery, (error, response, body) => {
+  //HTTP request
+  request(apiQuery, (error, response, body) => {
+    const object = JSON.parse(body); // JSON string into actual object
 
-  if (error) {
-    console.log(`error: ${error}`);
-  }
-  
-  if (!(response.statusCode >= 200 || response.statusCode < 300)) {
-    console.log(`statusCode: ${response.statusCode}`);
-  }
+    let description = null; // if name does not exist return null
 
-  const object = JSON.parse(body);
-  console.log(object[0].description);
-});
+    if (!(response.statusCode >= 200 || response.statusCode < 300)) {
+      return `statusCode: ${response.statusCode}`;
+    }
 
-//Example
-// node breedFetcher.js ragdoll
+    if (object && object[0] !== undefined) {
+      description = object[0].description; // If does exist return description
+    }
+
+    callback(error, description);
+  });
+};
+
+
+module.exports = {
+  fetchBreedDescription
+};
